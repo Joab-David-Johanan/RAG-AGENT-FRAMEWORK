@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+# Virtual environments
+venv/
+.env
+
+# Node
+node_modules/
+.next/
+dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+
+# Logs
+logs/
+
+# Egg-info
+*.egg-info
+
+# git 
+.git
