@@ -44,7 +44,12 @@ export default function Home() {
     setUploadedFiles(prev => [...prev, file.name])
 
     const formData = new FormData()
+
+    // THIS sends the real file to FastAPI
     formData.append("file", file)
+
+    // NEW: send a query for the RAG agent
+    formData.append("query", "Explain the uploaded document")
 
     try {
 
@@ -58,7 +63,7 @@ export default function Home() {
       // SHOW MESSAGE AFTER PROCESSING
       setMessages(prev => [
         ...prev,
-        { role: "assistant", content: data.message }
+        { role: "assistant", content: data.rag_response }
       ])
 
     } catch {

@@ -31,16 +31,16 @@ class StreamingHandler(BaseCallbackHandler):
 # Setup LLM
 # ---------------------------
 
-# llm = init_chat_model("openai:gpt-4o-mini")
+llm = init_chat_model("openai:gpt-4o-mini")
 
 stream_handler = StreamingHandler()
 
-llm = ChatGroq(
-    model="llama-3.1-8b-instant",
-    temperature=0,
-    streaming=True,
-    callbacks=[stream_handler],
-)
+# llm = ChatGroq(
+#     model="llama-3.1-8b-instant",
+#     temperature=0,
+#     streaming=True,
+#     callbacks=[stream_handler],
+# )
 
 
 # ---------------------------
