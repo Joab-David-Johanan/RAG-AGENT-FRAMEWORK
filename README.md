@@ -53,6 +53,8 @@ Users can upload documents, build vector embeddings, and interact with multiple 
 
 The project serves as a **research and experimentation framework** for studying how different RAG architectures affect reasoning, retrieval quality, and response generation.
 
+[⬆ Back to Top](#table-of-contents)
+
 ---
 
 # Vision
@@ -75,6 +77,8 @@ This framework explores how combining **retrieval pipelines, specialized agents,
 - Research experimentation
 
 The long-term vision is to build a **research-grade platform for experimenting with modern RAG strategies**.
+
+[⬆ Back to Top](#table-of-contents)
 
 ---
 
@@ -123,6 +127,8 @@ rag_agent_framework
 
 This structure separates responsibilities into **clear system layers**, improving maintainability and modular development.
 
+[⬆ Back to Top](#table-of-contents)
+
 ---
 
 # System Architecture
@@ -150,6 +156,8 @@ Core architectural components include:
 - Agent orchestration
 - LLM reasoning
 - Interactive UI
+
+[⬆ Back to Top](#table-of-contents)
 
 ---
 
@@ -193,6 +201,8 @@ This expands the system beyond traditional text-only retrieval.
 Cache RAG stores previously generated responses and retrieved contexts.  
 If a similar query appears again, the system can reuse cached responses to reduce latency and cost.
 
+[⬆ Back to Top](#table-of-contents)
+
 ---
 
 # Vector Store and Retrieval Pipeline
@@ -217,6 +227,8 @@ Retriever Query
 
 
 The framework uses **FAISS vector indexing** combined with embedding models to perform semantic search over documents.
+
+[⬆ Back to Top](#table-of-contents)
 
 ---
 
@@ -248,6 +260,8 @@ Final Answer
 
 Agents communicate through structured messages and determine whether to continue reasoning or terminate execution.
 
+[⬆ Back to Top](#table-of-contents)
+
 ---
 
 # Frontend Interface
@@ -263,6 +277,8 @@ The interface provides:
 - Sidebar-based navigation
 
 Users can switch between different RAG modes and observe how each architecture responds to queries.
+
+[⬆ Back to Top](#table-of-contents)
 
 ---
 
@@ -280,6 +296,8 @@ Once uploaded:
 6. The retriever becomes available for querying
 
 This pipeline allows the system to build a **dynamic knowledge base from user-provided documents**.
+
+[⬆ Back to Top](#table-of-contents)
 
 ---
 
@@ -309,6 +327,8 @@ This pipeline allows the system to build a **dynamic knowledge base from user-pr
 
 - Tavily Search
 
+[⬆ Back to Top](#table-of-contents)
+
 ---
 
 # System Design Considerations
@@ -324,6 +344,8 @@ Key design principles used in the project include:
 
 The framework is designed to allow **new RAG architectures or tools to be added easily**.
 
+[⬆ Back to Top](#table-of-contents)
+
 ---
 
 # Features
@@ -337,6 +359,8 @@ Key features of the system include:
 - Interactive chat interface
 - Modular backend architecture
 - Dynamic knowledge base construction
+
+[⬆ Back to Top](#table-of-contents)
 
 ---
 
@@ -352,8 +376,12 @@ Potential future enhancements include:
 - Persistent vector database storage
 - Query tracing and observability
 
+[⬆ Back to Top](#table-of-contents)
+
 ---
 
 # License
 
 This project is released under the **MIT License**.
+
+[⬆ Back to Top](#table-of-contents)
