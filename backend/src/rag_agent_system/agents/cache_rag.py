@@ -3,42 +3,38 @@ from dotenv import load_dotenv
 
 from langchain.agents import create_agent
 from langchain_core.tools import Tool
-from langchain_core.messages import HumanMessage, AIMessage
-from langchain_core.callbacks import BaseCallbackHandler
-from langchain_groq import ChatGroq
+from langchain_core.messages import HumanMessage
+from langchain.chat_models import init_chat_model
 
 from langgraph.graph import MessagesState, StateGraph, START, END
 from langgraph.types import Command
 
-from rag_agent_system.retrieval.vector_store import build_vector_store
+from rag_agent_system.retrieval.vector_store import get_retriever
 
 import json
-import os
+from pathlib import Path
 
 load_dotenv()
 
 
 # =====================================================
-# Simple Query Cache
-# =====================================================
-# Stores previous queries and answers
-# In production you would likely use:
-# - Redis
-# - vector cache
-# - semantic cache
+# cache storage
 # =====================================================
 
-CACHE_FILE = "rag_cache.json"
+# store cache in backend/data/rag_cache.json
+CACHE_FILE = Path(__file__).resolve().parents[3] / "data" / "rag_cache.json"
 
 
 def load_cache():
-    if os.path.exists(CACHE_FILE):
+    # load cache if file exists
+    if CACHE_FILE.exists():
         with open(CACHE_FILE, "r") as f:
             return json.load(f)
     return {}
 
 
 def save_cache(cache):
+    # write cache to disk
     with open(CACHE_FILE, "w") as f:
         json.dump(cache, f, indent=2)
 
@@ -47,48 +43,20 @@ query_cache = load_cache()
 
 
 # =====================================================
-# Streaming Handler
+# setup llm
 # =====================================================
 
-
-class StreamingHandler(BaseCallbackHandler):
-
-    def __init__(self):
-        self.tokens = []
-
-    def on_llm_new_token(self, token: str, **kwargs):
-        print(token, end="", flush=True)
-        self.tokens.append(token)
-
-
-stream_handler = StreamingHandler()
+llm = init_chat_model("openai:gpt-4o-mini")
 
 
 # =====================================================
-# LLM Setup
-# =====================================================
-
-llm = ChatGroq(
-    model="llama-3.1-8b-instant",
-    temperature=0,
-)
-
-stream_llm = ChatGroq(
-    model="llama-3.1-8b-instant",
-    temperature=0,
-    streaming=True,
-    callbacks=[stream_handler],
-)
-
-
-# =====================================================
-# Retriever Tool
+# retriever tool
 # =====================================================
 
 
-def make_retriever_tool(file_path):
+def make_retriever_tool():
 
-    retriever = build_vector_store(file_path)
+    retriever = get_retriever()
 
     def tool_fn(query: str):
 
@@ -104,67 +72,27 @@ def make_retriever_tool(file_path):
 
     return Tool(
         name="InternalDocs",
-        description="Search internal research documents.",
+        description="Search internal documents",
         func=tool_fn,
     )
 
 
 # =====================================================
-# Build Graph
+# build graph
 # =====================================================
 
 
-def build_graph(text_file_path: str, llm_model):
+def build_graph():
 
-    retriever_tool = make_retriever_tool(text_file_path)
+    retriever_tool = make_retriever_tool()
 
     rag_agent = create_agent(
-        model=llm_model,
+        model=llm,
         tools=[retriever_tool],
         system_prompt="Use retrieved documents to answer the question.",
     )
 
-    # -------------------------------------------------
-    # Cache Check Node
-    # -------------------------------------------------
-
-    def cache_check_node(
-        state: MessagesState,
-    ) -> Command[Literal["retrieve", END]]:
-
-        query = state["messages"][-1].content
-
-        print("\n--- CHECKING CACHE ---\n")
-
-        # ----------------------------------------------
-        # If query already exists in cache
-        # we SKIP the LLM and retrieval completely
-        # ----------------------------------------------
-
-        if query in query_cache:
-
-            cached_answer = query_cache[query]
-
-            print("Cache HIT")
-
-            return Command(
-                update={
-                    "messages": state["messages"] + [AIMessage(content=cached_answer)]
-                },
-                goto=END,
-            )
-
-        print("Cache MISS")
-
-        return Command(
-            update={"messages": state["messages"]},
-            goto="retrieve",
-        )
-
-    # -------------------------------------------------
-    # Retrieval Node
-    # -------------------------------------------------
-
+    # node that runs retrieval + generation
     def retrieve_node(
         state: MessagesState,
     ) -> Command[Literal["generate_answer"]]:
@@ -176,20 +104,15 @@ def build_graph(text_file_path: str, llm_model):
             goto="generate_answer",
         )
 
-    # -------------------------------------------------
-    # Answer Node
-    # -------------------------------------------------
-
-    def answer_node(state: MessagesState) -> Command[Literal[END]]:
+    # node that saves answer to cache
+    def answer_node(
+        state: MessagesState,
+    ) -> Command[Literal[END]]:
 
         final_answer = state["messages"][-1].content
         query = state["messages"][0].content
 
         print("\n--- SAVING TO CACHE ---\n")
-
-        # ----------------------------------------------
-        # Store query + answer for future reuse
-        # ----------------------------------------------
 
         query_cache[query] = final_answer
         save_cache(query_cache)
@@ -199,50 +122,70 @@ def build_graph(text_file_path: str, llm_model):
             goto=END,
         )
 
-    # -------------------------------------------------
-    # Graph
-    # -------------------------------------------------
-
     workflow = StateGraph(MessagesState)
 
-    workflow.add_node("cache_check", cache_check_node)
     workflow.add_node("retrieve", retrieve_node)
     workflow.add_node("generate_answer", answer_node)
 
-    workflow.add_edge(START, "cache_check")
+    workflow.add_edge(START, "retrieve")
 
     return workflow.compile()
 
 
 # =====================================================
-# Non-Streaming Runner
+# public runner
 # =====================================================
 
 
-def run_cache_rag(query: str, text_file_path: str):
+def run_cache_rag(query: str):
 
-    graph = build_graph(text_file_path, llm)
+    print("\n===== CACHE RAG EXECUTION =====\n")
 
-    response = graph.invoke({"messages": [HumanMessage(content=query)]})
+    # -----------------------------------
+    # check cache BEFORE running graph
+    # -----------------------------------
 
-    return response["messages"][-1].content
+    if query in query_cache:
 
+        print("\n--- CACHE HIT ---\n")
 
-# =====================================================
-# Streaming Runner
-# =====================================================
+        return {
+            "response": query_cache[query],
+            "cache_hit": True,
+        }
 
+    print("\n--- CACHE MISS ---\n")
 
-def run_cache_rag_stream(query: str, text_file_path: str):
+    # -----------------------------------
+    # retrieve context for graph input
+    # -----------------------------------
 
-    graph = build_graph(text_file_path, stream_llm)
+    retriever = get_retriever()
+    docs = retriever.invoke(query)
 
-    inputs = {"messages": [HumanMessage(content=query)]}
+    context = "\n\n".join([d.page_content for d in docs])
+
+    graph = build_graph()
+
+    inputs = {
+        "messages": [
+            HumanMessage(
+                content=f"""
+        User question:
+        {query}
+
+        Retrieved document:
+        {context}
+
+        Discuss and produce a final explanation.
+        """
+            )
+        ]
+    }
 
     final_response = ""
 
-    print("\n===== STREAMING CACHE RAG =====\n")
-
+    # run graph execution
     for step in graph.stream(inputs, {"recursion_limit": 20}):
 
         for node, state in step.items():
@@ -253,4 +196,14 @@ def run_cache_rag_stream(query: str, text_file_path: str):
 
             final_response = last_msg.content
 
-    return final_response
+    # -----------------------------------
+    # save to cache
+    # -----------------------------------
+
+    query_cache[query] = final_response
+    save_cache(query_cache)
+
+    return {
+        "response": final_response,
+        "cache_hit": False,
+    }

@@ -1,40 +1,52 @@
-Transformers are a type of neural network architecture used in natural language processing.
-They were introduced in the paper "Attention is All You Need".
-Transformers rely heavily on the attention mechanism.
-Attention allows the model to focus on important parts of the input.
-Before transformers, recurrent neural networks were common.
-Recurrent networks process tokens sequentially.
-Transformers process tokens in parallel.
-This makes transformers faster during training.
-Transformers also scale better with large datasets.
-Large language models are usually based on transformers.
-Examples include GPT, BERT, and T5.
-Coordination improves complex reasoning.
-Tools allow agents to interact with external systems.
-Examples include search APIs and databases.
-Agents can call APIs as tools.
-Tool usage is controlled by prompts.
-Good tool descriptions improve agent decisions.
-Observability helps debug agent systems.
-Logging records agent actions.
-Metrics track performance.
-Monitoring ensures reliability.
-Caching reduces repeated computations.
-Redis is often used for caching.
-Semantic caching stores embedding matches.
-This speeds up repeated queries.
-Evaluation measures system quality.
-Datasets can benchmark performance.
-Hallucination detection is important.
-Guardrails can filter unsafe outputs.
-Multimodal models combine different data types.
-Agentic systems will orchestrate complex pipelines.
-These pipelines may include retrieval and reasoning.
-Modern AI development requires good architecture.
-Modular systems are easier to maintain.
-Testing ensures stability.
-Continuous improvement drives progress.
-AI systems continue evolving rapidly.
-Researchers explore new architectures frequently.
-The transformer architecture remains dominant today.
-Understanding transformers helps build better AI systems.
+Artificial Intelligence is transforming industries worldwide.
+Machine learning enables computers to learn from data.
+Deep learning is a subset of machine learning.
+Neural networks mimic the structure of the human brain.
+Transformers revolutionized natural language processing.
+The attention mechanism allows models to focus on important tokens.
+Large language models are trained on massive datasets.
+OpenAI developed the GPT family of models.
+Retrieval Augmented Generation combines search and generation.
+RAG improves factual accuracy of language models.
+Vector databases store embeddings efficiently.
+Embeddings convert text into numerical representations.
+Semantic search finds meaning instead of keywords.
+FAISS is a library for efficient similarity search.
+Chunking splits documents into smaller pieces.
+Overlapping chunks preserve context between segments.
+Tokenization converts text into tokens.
+Inference is the process of generating model outputs.
+Fine-tuning adapts models to specific tasks.
+Prompt engineering improves model responses.
+Agents allow models to use tools dynamically.
+Multi-agent systems coordinate multiple AI agents.
+Corrective RAG verifies answers using external sources.
+Adaptive RAG dynamically selects retrieval strategies.
+Multi-modal models process text, images, and audio.
+Computer vision enables machines to understand images.
+Speech recognition converts audio to text.
+Generative models create new data.
+Diffusion models generate realistic images.
+LLMs power chat assistants.
+AI assistants can answer questions and automate workflows.
+LangChain helps build LLM applications.
+Vector stores enable scalable document retrieval.
+Document loaders import external data sources.
+Text splitters prepare data for embedding.
+Similarity search retrieves relevant documents.
+Cosine similarity measures embedding similarity.
+Dot product is another similarity metric.
+Knowledge bases store structured information.
+Data pipelines automate data processing.
+Caching improves system performance.
+GPU acceleration speeds up training.
+Cloud platforms host AI infrastructure.
+Docker simplifies application deployment.
+Microservices architecture separates system components.
+FastAPI builds high-performance APIs.
+Next.js enables modern web frontends.
+React powers interactive user interfaces.
+TailwindCSS simplifies styling.
+Streamlit is used for quick ML apps.
+RAG systems combine retrieval and reasoning.
+Future AI systems will be increasingly autonomous.

@@ -2,19 +2,13 @@
 # retrieves both text and images from pdf using clip embeddings
 # then sends text + images to gpt-4 vision model for reasoning
 
-import fitz
-from PIL import Image
-import io
-import base64
 import os
-import torch
-import numpy as np
 
 from dotenv import load_dotenv
 
 
 from langchain.chat_models import init_chat_model
-from langchain.schema.messages import HumanMessage
+from langchain_core.messages import HumanMessage
 from rag_agent_system.retrieval.multi_modal_vectorstore import (
     retrieve_multimodal,
     build_multimodal_vector_store,

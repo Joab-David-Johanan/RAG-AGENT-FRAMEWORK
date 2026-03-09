@@ -29,7 +29,7 @@ export default function Home() {
   // chat history
   // system role added for centered blue informational messages
   const [messages, setMessages] = useState<
-    { role: "user" | "assistant" | "system"; content: string }[]
+    { role: "user" | "assistant" | "system" | "general"; content: string }[]
   >([])
 
   // list of uploaded files shown in sidebar
@@ -69,7 +69,23 @@ export default function Home() {
         { role: "system", content: `${mode} rag disabled.` }
       ])
 
-    } else {
+    } 
+    else {
+
+      // if another rag is already active prevent switching
+      // user must disable the current rag first
+      if (selectedRag !== null) {
+
+        setMessages(prev => [
+          ...prev,
+          {
+            role: "system",
+            content: `Disable ${selectedRag} before selecting ${mode}.`
+          }
+        ])
+
+        return
+      }
 
       // activate rag
       setSelectedRag(mode)
@@ -193,13 +209,25 @@ export default function Home() {
 
       const data = await response.json()
 
-      // replace thinking message with real answer
-      setMessages(prev => [
-        ...prev.slice(0, -1),
-        { role: "assistant", content: data.response }
-      ])
+      // if cache hit show system message before answer
+      if (data.cache_hit) {
 
-    } catch {
+        setMessages(prev => [
+          ...prev.slice(0, -1),
+          { role: "system", content: "⚡ Cache HIT — response served instantly." },
+          { role: "assistant", content: data.response }
+        ])
+
+      } else {
+
+        setMessages(prev => [
+          ...prev.slice(0, -1),
+          { role: "assistant", content: data.response }
+        ])
+
+      }
+
+    }catch {
 
       setMessages(prev => [
         ...prev.slice(0, -1),
@@ -303,7 +331,7 @@ export default function Home() {
 
           <input
             type="file"
-            accept=".txt"
+            accept=".txt,.pdf"
             ref={fileInputRef}
             onChange={handleFileUpload}
             className="hidden"

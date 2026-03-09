@@ -9,7 +9,7 @@ import numpy as np
 from transformers import CLIPProcessor, CLIPModel
 
 from langchain_core.documents import Document
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 
 # -----------------------------------
@@ -38,10 +38,17 @@ def embed_image(image_data):
     inputs = clip_processor(images=image, return_tensors="pt")
 
     with torch.no_grad():
-        features = clip_model.get_image_features(**inputs)
-        features = features / features.norm(dim=-1, keepdim=True)
 
-    return features.squeeze().numpy()
+        outputs = clip_model.get_image_features(**inputs)
+
+        if hasattr(outputs, "pooler_output"):
+            features = outputs.pooler_output
+        else:
+            features = outputs
+
+        features = features / torch.norm(features, p=2, dim=-1, keepdim=True)
+
+    return features[0].cpu().numpy()
 
 
 # embed text using clip
@@ -52,10 +59,19 @@ def embed_text(text):
     )
 
     with torch.no_grad():
-        features = clip_model.get_text_features(**inputs)
-        features = features / features.norm(dim=-1, keepdim=True)
 
-    return features.squeeze().numpy()
+        outputs = clip_model.get_text_features(**inputs)
+
+        # handle both tensor output and HF output object
+        if hasattr(outputs, "pooler_output"):
+            features = outputs.pooler_output
+        else:
+            features = outputs
+
+        # normalize embedding
+        features = features / torch.norm(features, p=2, dim=-1, keepdim=True)
+
+    return features[0].cpu().numpy()
 
 
 # -----------------------------------
