@@ -1,11 +1,17 @@
 "use client"
 
-import { useState, useRef } from "react"
+// react hooks for state, refs and effects
+import { useState, useRef, useEffect } from "react"
+
+// chat bubble component
 import ChatMessage from "@/components/chat-message"
+
+// ui components
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
+// sidebar icons
 import {
   GitBranch,
   Wrench,
@@ -20,36 +26,50 @@ import {
 
 export default function Home() {
 
+  // chat history
   const [messages, setMessages] = useState<
     { role: "user" | "assistant"; content: string }[]
   >([])
 
+  // list of uploaded files shown in sidebar
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([])
+
+  // chat input text
   const [input, setInput] = useState("")
+
+  // sidebar open/close state
   const [sidebarOpen, setSidebarOpen] = useState(true)
+
+  // selected rag mode
   const [selectedRag, setSelectedRag] = useState<string | null>(null)
 
+  // hidden file input reference
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
+  // reference to bottom of chat for auto scroll
+  const bottomRef = useRef<HTMLDivElement | null>(null)
+
+  // whenever messages change scroll to newest one
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [messages])
+
+  // toggles rag button selection
   function toggleRag(mode: string) {
     setSelectedRag(selectedRag === mode ? null : mode)
   }
 
+  // handles file upload and sends file to backend
   async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
 
     const file = e.target.files?.[0]
     if (!file) return
 
-    // SHOW FILE IMMEDIATELY
+    // add filename to sidebar
     setUploadedFiles(prev => [...prev, file.name])
 
     const formData = new FormData()
-
-    // THIS sends the real file to FastAPI
     formData.append("file", file)
-
-    // NEW: send a query for the RAG agent
-    formData.append("query", "Explain the uploaded document")
 
     try {
 
@@ -60,10 +80,10 @@ export default function Home() {
 
       const data = await response.json()
 
-      // SHOW MESSAGE AFTER PROCESSING
+      // show backend message in chat
       setMessages(prev => [
         ...prev,
-        { role: "assistant", content: data.rag_response }
+        { role: "assistant", content: data.message }
       ])
 
     } catch {
@@ -76,23 +96,58 @@ export default function Home() {
     }
   }
 
+  // remove uploaded file from sidebar list
   function removeFile(index: number) {
     setUploadedFiles(prev => prev.filter((_, i) => i !== index))
   }
 
-  function sendMessage() {
+  // sends user query to backend rag endpoint
+  async function sendMessage() {
 
     if (!input.trim()) return
 
+    const userMessage = input
+
+    // show user message + temporary thinking message
     setMessages(prev => [
       ...prev,
-      { role: "user", content: input },
+      { role: "user", content: userMessage },
       { role: "assistant", content: "Thinking..." }
     ])
 
     setInput("")
+
+    try {
+
+      const response = await fetch("http://localhost:8000/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          query: userMessage
+        })
+      })
+
+      const data = await response.json()
+
+      // replace thinking message with real answer
+      setMessages(prev => [
+        ...prev.slice(0, -1),
+        { role: "assistant", content: data.response }
+      ])
+
+    } catch {
+
+      setMessages(prev => [
+        ...prev.slice(0, -1),
+        { role: "assistant", content: "Error getting response." }
+      ])
+
+    }
   }
 
+  // sidebar button styles
   const buttonBase =
     "w-full justify-start text-2xl py-8 px-6 transition-all duration-200 flex items-center gap-6"
 
@@ -105,7 +160,7 @@ export default function Home() {
   return (
     <div className="flex h-screen w-full overflow-hidden">
 
-      {/* Sidebar */}
+      {/* sidebar */}
 
       <aside
         className={`border-r border-white/10 bg-gradient-to-b from-indigo-600 via-purple-600 to-blue-600 p-6 flex flex-col gap-6 transition-all duration-300 ${
@@ -113,6 +168,7 @@ export default function Home() {
         }`}
       >
 
+        {/* sidebar collapse button */}
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
           className="text-white/80 hover:text-white flex justify-end"
@@ -120,11 +176,14 @@ export default function Home() {
           {sidebarOpen ? <PanelLeftClose size={34} /> : <PanelLeftOpen size={34} />}
         </button>
 
+        {/* sidebar title */}
         {sidebarOpen && (
           <h2 className="text-4xl font-bold text-white mb-4">
             RAG Agents
           </h2>
         )}
+
+        {/* rag mode buttons */}
 
         <Button
           onClick={() => toggleRag("adaptive")}
@@ -153,7 +212,7 @@ export default function Home() {
           }`}
         >
           <Users size={52} />
-          {sidebarOpen && "Multi-Agent"}
+          {sidebarOpen && "Multi-Agent RAG"}
         </Button>
 
         <Button
@@ -176,7 +235,7 @@ export default function Home() {
           {sidebarOpen && "Cache RAG"}
         </Button>
 
-        {/* Upload */}
+        {/* upload section */}
 
         <div className="mt-6 flex flex-col gap-4">
 
@@ -195,6 +254,8 @@ export default function Home() {
             <Paperclip size={50} />
             {sidebarOpen && "Upload File"}
           </Button>
+
+          {/* uploaded files list */}
 
           {sidebarOpen && (
             <div className="text-lg text-white mt-3 space-y-3">
@@ -227,11 +288,13 @@ export default function Home() {
 
       </aside>
 
-      {/* Chat */}
+      {/* main chat area */}
 
       <main className="flex min-w-0 flex-1 flex-col bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
 
-        <ScrollArea className="flex-1">
+        {/* scrollable chat container */}
+
+        <ScrollArea className="flex-1 overflow-y-auto">
 
           {messages.length === 0 ? (
 
@@ -241,7 +304,9 @@ export default function Home() {
 
           ) : (
 
-            <div className="mx-auto max-w-3xl space-y-6 p-8">
+            <div className="mx-auto max-w-6xl space-y-8 px-10 py-8">
+
+              {/* render chat messages */}
 
               {messages.map((m, i) => (
                 <ChatMessage
@@ -251,26 +316,41 @@ export default function Home() {
                 />
               ))}
 
+              {/* invisible element used for auto scroll */}
+
+              <div ref={bottomRef} />
+
             </div>
 
           )}
 
         </ScrollArea>
 
+        {/* chat input */}
+
         <div className="border-t border-white/10 bg-black/20 backdrop-blur p-6">
 
-          <div className="mx-auto flex max-w-3xl gap-3 items-end">
+          <div className="mx-auto flex max-w-6xl gap-3 items-center px-10">
 
             <Textarea
               placeholder="Ask something..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
+
+              // enter sends message, shift+enter adds new line
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault()
+                  sendMessage()
+                }
+              }}
+
               className="min-h-[60px] border-white/10 bg-white/5 text-white"
             />
 
             <Button
               onClick={sendMessage}
-              className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white"
+              className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-lg px-8 py-5 rounded-xl shadow-lg hover:scale-[1.03] transition-all duration-200"
             >
               Send
             </Button>

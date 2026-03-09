@@ -1,6 +1,7 @@
 # backend/src/rag_agent_system/api/routes.py
 
 from fastapi import APIRouter, UploadFile, File, Form
+from pydantic import BaseModel
 from pathlib import Path
 import shutil
 
@@ -18,25 +19,40 @@ DATA_DIR = Path(__file__).resolve().parents[3] / "data"
 # only create folder if it does not exist
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
+# ------------------------------
+# CHANGE: file upload endpoint
+# ------------------------------
+
 
 @router.post("/upload")
-async def upload_file(
-    file: UploadFile = File(...), query: str = Form("Summarize the uploaded document")
-):
+async def upload_file(file: UploadFile = File(...)):
 
     file_path = DATA_DIR / file.filename
 
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    # process file into vector store
+    # build vector store immediately
     build_vector_store(str(file_path))
 
-    # run multi-agent RAG on the uploaded file
-    rag_response = run_multi_agent_rag(query)
+    # vector store success message sent to Next.js
+    return {"message": f"{file.filename} processed in vector store"}
 
-    # response sent to Next.js
-    return {
-        "message": f"{file.filename} processed in vector store",
-        "rag_response": rag_response,
-    }
+
+# ------------------------------
+# CHANGE: query endpoint
+# ------------------------------
+
+
+class QueryRequest(BaseModel):
+    query: str
+
+
+@router.post("/chat")
+async def chat_query(data: QueryRequest):
+
+    # run multi-agent RAG on the uploaded file
+    response = run_multi_agent_rag(data.query)
+
+    # rag response sent to Next.js
+    return {"response": response}
