@@ -27,8 +27,9 @@ import {
 export default function Home() {
 
   // chat history
+  // system role added for centered blue informational messages
   const [messages, setMessages] = useState<
-    { role: "user" | "assistant"; content: string }[]
+    { role: "user" | "assistant" | "system"; content: string }[]
   >([])
 
   // list of uploaded files shown in sidebar
@@ -56,7 +57,30 @@ export default function Home() {
 
   // toggles rag button selection
   function toggleRag(mode: string) {
-    setSelectedRag(selectedRag === mode ? null : mode)
+
+    // if user clicks the same rag again disable it
+    if (selectedRag === mode) {
+
+      setSelectedRag(null)
+
+      // system message when rag is disabled
+      setMessages(prev => [
+        ...prev,
+        { role: "system", content: `${mode} rag disabled.` }
+      ])
+
+    } else {
+
+      // activate rag
+      setSelectedRag(mode)
+
+      // system message confirming rag selection
+      setMessages(prev => [
+        ...prev,
+        { role: "system", content: `${mode} RAG selected.` }
+      ])
+
+    }
   }
 
   // handles file upload and sends file to backend
@@ -83,7 +107,7 @@ export default function Home() {
       // show backend message in chat
       setMessages(prev => [
         ...prev,
-        { role: "assistant", content: data.message }
+        { role: "general", content: data.message }
       ])
 
     } catch {
@@ -106,6 +130,21 @@ export default function Home() {
 
     if (!input.trim()) return
 
+    // prevent sending if rag architecture not selected
+    if (!selectedRag) {
+
+      // system warning message
+      setMessages(prev => [
+        ...prev,
+        {
+          role: "system",
+          content: "Select a RAG architecture from the sidebar to continue."
+        }
+      ])
+
+      return
+    }
+
     const userMessage = input
 
     // show user message + temporary thinking message
@@ -119,7 +158,30 @@ export default function Home() {
 
     try {
 
-      const response = await fetch("http://localhost:8000/chat", {
+      // choose backend endpoint based on selected rag
+      let endpoint = ""
+
+      if (selectedRag === "Multi-Agent") {
+        endpoint = "http://localhost:8000/chat"
+      }
+
+      if (selectedRag === "Multi-Modal") {
+        endpoint = "http://localhost:8000/multimodal"
+      }
+
+      if (selectedRag === "Adaptive") {
+        endpoint = "http://localhost:8000/adaptive"
+      }
+
+      if (selectedRag === "Corrective") {
+        endpoint = "http://localhost:8000/corrective"
+      }
+
+      if (selectedRag === "Cache") {
+        endpoint = "http://localhost:8000/cache"
+      }
+
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -186,9 +248,9 @@ export default function Home() {
         {/* rag mode buttons */}
 
         <Button
-          onClick={() => toggleRag("adaptive")}
+          onClick={() => toggleRag("Adaptive")}
           className={`${buttonBase} ${
-            selectedRag === "adaptive" ? activeStyle : hoverStyle
+            selectedRag === "Adaptive" ? activeStyle : hoverStyle
           }`}
         >
           <GitBranch size={52} />
@@ -196,9 +258,9 @@ export default function Home() {
         </Button>
 
         <Button
-          onClick={() => toggleRag("corrective")}
+          onClick={() => toggleRag("Corrective")}
           className={`${buttonBase} ${
-            selectedRag === "corrective" ? activeStyle : hoverStyle
+            selectedRag === "Corrective" ? activeStyle : hoverStyle
           }`}
         >
           <Wrench size={52} />
@@ -206,9 +268,9 @@ export default function Home() {
         </Button>
 
         <Button
-          onClick={() => toggleRag("multi")}
+          onClick={() => toggleRag("Multi-Agent")}
           className={`${buttonBase} ${
-            selectedRag === "multi" ? activeStyle : hoverStyle
+            selectedRag === "Multi-Agent" ? activeStyle : hoverStyle
           }`}
         >
           <Users size={52} />
@@ -216,9 +278,9 @@ export default function Home() {
         </Button>
 
         <Button
-          onClick={() => toggleRag("multimodal")}
+          onClick={() => toggleRag("Multi-Modal")}
           className={`${buttonBase} ${
-            selectedRag === "multimodal" ? activeStyle : hoverStyle
+            selectedRag === "Multi-Modal" ? activeStyle : hoverStyle
           }`}
         >
           <Image size={52} />
@@ -226,9 +288,9 @@ export default function Home() {
         </Button>
 
         <Button
-          onClick={() => toggleRag("cache")}
+          onClick={() => toggleRag("Cache")}
           className={`${buttonBase} ${
-            selectedRag === "cache" ? activeStyle : hoverStyle
+            selectedRag === "Cache" ? activeStyle : hoverStyle
           }`}
         >
           <Database size={52} />
