@@ -92,9 +92,6 @@ If the same query is asked again, the system **skips retrieval and generation en
 
 The screenshot shows a **cache hit**, where the response is returned immediately without running the RAG pipeline again.
 
----
-
-
 [⬆ Back to Top](#table-of-contents)
 
 ---
