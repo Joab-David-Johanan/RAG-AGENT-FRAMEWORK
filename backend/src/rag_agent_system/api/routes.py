@@ -9,6 +9,7 @@ from rag_agent_system.retrieval.vector_store import build_vector_store
 
 # from rag_agent_system.agents.multi_agent_rag import run_multi_agent_rag
 from rag_agent_system.agents.mar import run_multi_agent_rag
+from rag_agent_system.agents.multi_modal_rag import run_multimodal_rag
 
 
 router = APIRouter()
@@ -55,4 +56,12 @@ async def chat_query(data: QueryRequest):
     response = run_multi_agent_rag(data.query)
 
     # rag response sent to Next.js
+    return {"response": response}
+
+
+@router.post("/multimodal")
+async def multimodal_query(query: str = Form(...), file_path: str = Form(...)):
+
+    response = run_multimodal_rag(query, file_path)
+
     return {"response": response}
