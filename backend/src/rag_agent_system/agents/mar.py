@@ -103,7 +103,7 @@ def build_graph():
         last = result["messages"][-1]
 
         # CHANGE: if turn limit reached → summarize and finish
-        if turn_count >= 10:
+        if turn_count >= 2:
 
             summary_prompt = f"""
 Summarize the discussion and produce the FINAL ANSWER.
