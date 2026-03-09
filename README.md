@@ -53,6 +53,48 @@ Users can upload documents, build vector embeddings, and interact with multiple 
 
 The project serves as a **research and experimentation framework** for studying how different RAG architectures affect reasoning, retrieval quality, and response generation.
 
+
+---
+
+### Multi-Agent RAG
+
+![Multi-Agent-RAG](assets/multi_agent_example.png)
+
+This example demonstrates the **Multi-Agent Retrieval-Augmented Generation (RAG)** architecture.
+
+In this setup, multiple specialized agents collaborate to answer a user query.  
+One agent focuses on **retrieving relevant information** from a `.txt` document, while another agent **synthesizes the final explanation**.
+
+The screenshot shows the system successfully **summarizing information from a text document using coordinated agent reasoning.**
+
+---
+
+### Multi-Modal RAG
+
+![Multi-Modal-RAG](assets/multi_modal_example.png)
+
+This example demonstrates the **Multi-Modal RAG** architecture.
+
+Unlike standard RAG systems that operate only on text, this architecture can retrieve and reason over **both text and images** extracted from a `.pdf` document.
+
+The screenshot shows the system **analyzing a bar plot from the PDF and explaining the data visually and contextually.**
+
+---
+
+### Cache RAG
+
+![Cache-RAG](assets/cache_hit.png)
+
+This example demonstrates the **Cache-Enhanced RAG** architecture.
+
+The system stores previous queries and their generated answers in a cache.  
+If the same query is asked again, the system **skips retrieval and generation entirely** and returns the cached response instantly.
+
+The screenshot shows a **cache hit**, where the response is returned immediately without running the RAG pipeline again.
+
+---
+
+
 [⬆ Back to Top](#table-of-contents)
 
 ---

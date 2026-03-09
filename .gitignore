@@ -30,3 +30,4 @@ logs/
 
 # git 
 .git
+*.code-workspace
