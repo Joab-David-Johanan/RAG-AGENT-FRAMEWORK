@@ -17,6 +17,7 @@ EXCLUDE_NAMES = {
 EXCLUDE_SUFFIXES = (
     ".egg-info",
     ".coverage",
+    ".code-workspace",
 )
 
 def should_exclude(name: str) -> bool:
