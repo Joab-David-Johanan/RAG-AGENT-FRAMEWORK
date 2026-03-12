@@ -124,43 +124,90 @@ The long-term vision is to build a **research-grade platform for experimenting w
 # Project Structure
 ```
 rag_agent_framework
-│
+├── assets
+│   ├── cache_hit.png
+│   ├── multi_agent_example.png
+│   └── multi_modal_example.png
 ├── backend
-│ ├── src
-│ │ └── rag_agent_system
-│ │ ├── agents
-│ │ │ └── multi_agent_rag.py
-│ │ │
-│ │ ├── api
-│ │ │ └── routes.py
-│ │ │
-│ │ ├── retrieval
-│ │ │ ├── loaders
-│ │ │ │ ├── pdf_loader.py
-│ │ │ │ ├── text_loader.py
-│ │ │ │ └── web_loader.py
-│ │ │ │
-│ │ │ └── vector_store.py
-│ │ │
-│ │ ├── orchestration
-│ │ │ └── router.py
-│ │ │
-│ │ ├── config
-│ │ │ └── settings.py
-│ │ │
-│ │ ├── common
-│ │ │ └── logger.py
-│ │ │
-│ │ └── main.py
-│
+│   ├── data
+│   │   ├── rag_cache.json
+│   │   └── sample.txt
+│   ├── src
+│   │   └── rag_agent_system
+│   │       ├── agents
+│   │       │   ├── __init__.py
+│   │       │   ├── adaptive_rag.py
+│   │       │   ├── cache_rag.py
+│   │       │   ├── corrective_rag.py
+│   │       │   ├── mar.py
+│   │       │   ├── multi_agent_rag.py
+│   │       │   └── multi_modal_rag.py
+│   │       ├── api
+│   │       │   ├── __init__.py
+│   │       │   └── routes.py
+│   │       ├── cache
+│   │       │   └── __init__.py
+│   │       ├── common
+│   │       │   ├── __init__.py
+│   │       │   └── logger.py
+│   │       ├── config
+│   │       │   ├── __init__.py
+│   │       │   └── settings.py
+│   │       ├── orchestration
+│   │       │   ├── __init__.py
+│   │       │   └── router.py
+│   │       ├── retrieval
+│   │       │   ├── loaders
+│   │       │   │   ├── __init__.py
+│   │       │   │   ├── pdf_loader.py
+│   │       │   │   ├── text_loader.py
+│   │       │   │   └── web_loader.py
+│   │       │   ├── __init__.py
+│   │       │   ├── multi_modal_vectorstore.py
+│   │       │   └── vector_store.py
+│   │       └── main.py
+│   ├── README.md
+│   ├── pyproject.toml
+│   ├── requirements.txt
+│   └── test_multi_agent_rag.py
 ├── frontend
-│ ├── app
-│ ├── components
-│ ├── lib
-│ └── public
-│
+│   ├── app
+│   │   ├── favicon.ico
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   └── page.tsx
+│   ├── components
+│   │   ├── ui
+│   │   │   ├── avatar.tsx
+│   │   │   ├── button.tsx
+│   │   │   ├── card.tsx
+│   │   │   ├── scroll-area.tsx
+│   │   │   ├── separator.tsx
+│   │   │   └── textarea.tsx
+│   │   └── chat-message.tsx
+│   ├── lib
+│   │   └── utils.ts
+│   ├── public
+│   │   ├── file.svg
+│   │   ├── globe.svg
+│   │   ├── next.svg
+│   │   ├── vercel.svg
+│   │   └── window.svg
+│   ├── .gitignore
+│   ├── README.md
+│   ├── components.json
+│   ├── eslint.config.mjs
+│   ├── next-env.d.ts
+│   ├── next.config.ts
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── postcss.config.mjs
+│   └── tsconfig.json
 ├── scripts
-│
+│   └── generate_tree.sh
+├── .env
+├── .gitignore
+├── README.md
 └── launcher.py
 ```
 
